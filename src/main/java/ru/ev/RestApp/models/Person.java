@@ -1,8 +1,12 @@
 package ru.ev.RestApp.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
-    @Entity
+@Entity
     @Table(name = "Person")
     public class Person {
         @Id
@@ -11,12 +15,17 @@ import jakarta.persistence.*;
         private int id;
 
         @Column(name = "name")
+        @NotEmpty
+        @Size(min = 2,max = 30)
         private String name;
 
         @Column(name = "age")
+        @Min(value = 0)
         private int age;
 
         @Column(name = "email")
+        @Email
+        @NotEmpty
         private String email;
 
         public Person() {
