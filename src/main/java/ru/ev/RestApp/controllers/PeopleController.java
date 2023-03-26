@@ -1,6 +1,7 @@
 package ru.ev.RestApp.controllers;
 
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -17,23 +18,29 @@ import ru.ev.RestApp.util.PersonNotFoundExeption;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/people")
 public class PeopleController {
 
     private final PeopleService peopleService;
+    private final ModelMapper modelMapper;
+
     @Autowired
-    public PeopleController(PeopleService peopleService) {
+    public PeopleController(PeopleService peopleService,
+                            ModelMapper modelMapper) {
         this.peopleService = peopleService;
+        this.modelMapper=modelMapper;
     }
     @GetMapping("/getall")
-    public List<Person> getAllPerson(){
-        return peopleService.findAll();
+    public List<PersonDTO> getAllPerson(){
+        return peopleService.findAll().stream().map(this::convertToPersonDTO)
+                .collect(Collectors.toList());
     }
     @GetMapping("/{id}")
-    public Person getPerson(@PathVariable("id") int id){
-        return peopleService.findOne(id);
+    public PersonDTO getPerson(@PathVariable("id") int id){
+        return convertToPersonDTO(peopleService.findOne(id));
 
     }
     @ExceptionHandler
@@ -66,17 +73,11 @@ public class PeopleController {
     }
 
     private Person convertToPerson(PersonDTO personDTO) {
-        Person person=new Person();
-
-        person.setName(personDTO.getName());
-        person.setAge(personDTO.getAge());
-        person.setEmail(personDTO.getEmail());
-
-
-
-        return person;
+        return modelMapper.map(personDTO, Person.class);
     }
-
+    private PersonDTO convertToPersonDTO(Person person){
+        return modelMapper.map(person,PersonDTO.class);
+    }
 
 
 }
